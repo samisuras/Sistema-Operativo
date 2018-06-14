@@ -1,6 +1,7 @@
 package Procesos;
 
 public class Sistema {
+    private int cont;
     private int MemoriaTotal;
     private int limiteMemoria;
     private int cuantos,NoCuanto,CuantoMaxPorProceso;
@@ -20,6 +21,16 @@ public class Sistema {
         this.numeroProceso = numeroProceso;
     }
 
+    public int getCont() {
+        return cont;
+    }
+
+    public void setCont(int cont) {
+        this.cont = cont;
+    }
+
+    
+    
     public boolean isBanSwap() {
         return banSwap;
     }

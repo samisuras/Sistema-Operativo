@@ -25,6 +25,13 @@ public class Proceso {
         memoria = (int)(Math.random()*Memoria)+1;
         
     }
+    
+    @Override
+    public String toString()
+    {
+        String aux = "["+this.ID+","+this.memoria+","+this.cuanto+"]";
+        return aux;
+    }
 
     public int getCuantoMaxPorProceso() {
         return CuantoMaxPorProceso;

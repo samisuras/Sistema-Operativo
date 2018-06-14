@@ -9,7 +9,12 @@ public class main {
         Scanner in = new Scanner(System.in);
         ArrayList <Proceso> ListaProcesos = new ArrayList<>();
         ArrayList <Proceso> ProcesoEspera = new ArrayList<>();
+        ArrayList <Proceso> ListaAux = new ArrayList<>();
+        ArrayList <Proceso> ListaAux2 = new ArrayList<>();
+        Sistema sistemaAux = new Sistema();
+        Sistema sistemaAux2 = new Sistema();
         Sistema sistema = new Sistema();
+        
         int vuelta=0;
         long inicio,finale;
         
@@ -18,17 +23,42 @@ public class main {
         
         System.out.print("Tamano de la memoria: ");
         sistema.setMemoriaTotal(in.nextInt());
+        sistemaAux.setMemoriaTotal(sistema.getMemoriaTotal());
+        sistemaAux2.setMemoriaTotal(sistema.getMemoriaTotal());
         System.out.print("\nTamano de memoria maximo por proceso: ");
         sistema.setLimiteMemoria(in.nextInt());
+        sistemaAux.setLimiteMemoria(sistema.getLimiteMemoria());
+        sistemaAux2.setLimiteMemoria(sistema.getLimiteMemoria());
         System.out.print("\nMaximo de cuantos: ");
         sistema.setCuantos(in.nextInt());
+        sistemaAux.setCuantos(sistema.getCuantos());
+        sistemaAux2.setCuantos(sistema.getCuantos());
         System.out.print("\nMaximo de ciclos: ");
         vuelta = in.nextInt();
         System.out.print("\nMaximo de cuanto por proceso: ");
         sistema.setCuantoMaxPorProceso(in.nextInt());
+        sistemaAux.setCuantoMaxPorProceso(sistema.getCuantoMaxPorProceso());
+        sistemaAux2.setCuantoMaxPorProceso(sistema.getCuantoMaxPorProceso());
         System.out.println("\nTipo de ajuste: \n1.- Primer ajuste\n2.-Mejor ajuste\n3.-Peor ajuste");
         System.out.print("\nRespuesta: ");
-        sistema.setTipoColocacion(in.nextInt());
+        int tipo = in.nextInt();
+        sistema.setTipoColocacion(tipo);
+        switch(tipo)
+        {
+            case 1:
+                sistemaAux.setTipoColocacion(2);
+                sistemaAux2.setTipoColocacion(3);
+                break;
+            case 2:
+                sistemaAux.setTipoColocacion(1);
+                sistemaAux2.setTipoColocacion(3);
+                break;
+            case 3:
+                sistemaAux.setTipoColocacion(1);
+                sistemaAux2.setTipoColocacion(2);
+                break;
+        }
+        sistemaAux.setTipoColocacion(sistema.getTipoColocacion());
         
         IniciarMemoria(ListaProcesos,sistema);
         
@@ -42,7 +72,7 @@ public class main {
             if(sistema.isBanSwap())
                 sistema.setBanSwap(false);
             mostrarProcesos(ListaProcesos,i+1);
-            InsertarProceso(ListaProcesos,sistema,ProcesoEspera,i);
+            InsertarProceso(ListaProcesos,sistema,ProcesoEspera,i,ListaAux,ListaAux2);
             mostrarProcesos(ListaProcesos,i+1);
             ReducirCuanto(ListaProcesos,sistema,ProcesoEspera);
             mostrarProcesos(ListaProcesos,i+1);
@@ -63,6 +93,52 @@ public class main {
         
         System.out.println("Tiempo de ejecucion: "+(sistema.getTiempoFinal()-sistema.getTiempoInicio())/1000+ " segundos");
         System.out.println("Ciclos del sistema: "+sistema.getNoCuanto());
+        
+        //VUELTA 2
+        System.out.print("\n\nIniciando vuelta 2 presione cualquier tecla para continuar...");
+        in.next();
+        ListaProcesos.clear();
+        IniciarMemoria(ListaProcesos,sistemaAux);
+        sistemaAux.setCont(0);
+        for(int i=0;i<vuelta;i++){
+            if((ListaProcesos.size()>2&&i>1)&&(!sistemaAux.isBanSwap())){
+                SwapRobin(ListaProcesos,sistemaAux);
+            }
+            if(sistemaAux.isBanSwap())
+                sistemaAux.setBanSwap(false);
+            InsertarProcesoAux(ListaProcesos,sistemaAux,ProcesoEspera,i,ListaAux);
+            ReducirCuanto(ListaProcesos,sistemaAux,ProcesoEspera);
+            JuntaMemoria(ListaProcesos,sistemaAux);
+            if(sistemaAux.getCuenta()>=vuelta)
+            {
+                break;
+            }
+            reiniciarBanderas(ListaProcesos);
+        }  
+        
+        //VUELTA 3
+        System.out.print("\n\nIniciando vuelta 3 presione cualquier tecla para continuar...");
+        in.next();
+        ListaProcesos.clear();
+        IniciarMemoria(ListaProcesos,sistemaAux2);
+        sistemaAux2.setCont(0);
+        for(int i=0;i<vuelta;i++){
+            if((ListaProcesos.size()>2&&i>1)&&(!sistemaAux2.isBanSwap())){
+                SwapRobin(ListaProcesos,sistemaAux2);
+            }
+            if(sistemaAux2.isBanSwap())
+                sistemaAux2.setBanSwap(false);
+            InsertarProcesoAux(ListaProcesos,sistemaAux2,ProcesoEspera,i,ListaAux2);
+            ReducirCuanto(ListaProcesos,sistemaAux2,ProcesoEspera);
+            
+            JuntaMemoria(ListaProcesos,sistemaAux2);
+            if(sistemaAux2.getCuenta()>=vuelta)
+            {
+                break;
+            }
+            reiniciarBanderas(ListaProcesos);
+        } 
+        
     }
     
     public static void Memoria(ArrayList procesos)
@@ -107,13 +183,138 @@ public class main {
      * @param sistema
      * @param ProcesoEspera
      */
-    public static void InsertarProceso(ArrayList ListaProcesos,Sistema sistema,ArrayList ProcesoEspera,int cont)
+    public static void InsertarProceso(ArrayList ListaProcesos,Sistema sistema,ArrayList ProcesoEspera,int cont,ArrayList ListaAux,ArrayList ListaAux2)
     {
         Proceso espera;
         if(ProcesoEspera.isEmpty())
         {
             sistema.setNumeroProceso(sistema.getNumeroProceso()+1);
             Proceso nuevo =  new Proceso(sistema.getNumeroProceso(),sistema.getCuantos(),sistema.getLimiteMemoria(),false);
+            
+            Proceso x = new Proceso();
+            x.setCuanto(nuevo.getCuanto());
+            x.setCuantoMaxPorProceso(nuevo.getCuantoMaxPorProceso());
+            x.setDespachado(false);
+            x.setID(nuevo.getID());
+            x.setMemoria(nuevo.getMemoria());
+            ListaAux.add(x);
+            
+            Proceso a = new Proceso();
+            a.setCuanto(nuevo.getCuanto());
+            a.setCuantoMaxPorProceso(nuevo.getCuantoMaxPorProceso());
+            a.setDespachado(false);
+            a.setID(nuevo.getID());
+            a.setMemoria(nuevo.getMemoria());
+            ListaAux2.add(a);
+            
+            if(ListaProcesos.size()>3)
+            {
+                if(EspacioEnBloques(nuevo,ListaProcesos))
+                {
+                    switch(sistema.getTipoColocacion())
+                    {
+                        case 1:
+                            System.out.println("Entra proceso: ["+nuevo.getID()+","+nuevo.getMemoria()+","+nuevo.getCuanto()+"]");
+                            PrimerAjuste(nuevo,ListaProcesos,sistema);
+                            //sistema.setCuantos(sistema.getCuantos()+1);
+                            break;
+                        case 2:
+                            System.out.println("Entra proceso: ["+nuevo.getID()+","+nuevo.getMemoria()+","+nuevo.getCuanto()+"]");
+                            MejorAjuste(nuevo,ListaProcesos,sistema);
+                            //MEJOR AJUSTE
+                            break;
+                        case 3:
+                            System.out.println("Entra proceso: ["+nuevo.getID()+","+nuevo.getMemoria()+","+nuevo.getCuanto()+"]");
+                            PeorAjuste(nuevo,ListaProcesos,sistema);
+                            //PEOR AJUSTE
+                            break;
+
+                    }
+                }
+                else{
+                        sistema.setCuenta(sistema.getCuenta()+1);
+                        AsignarEspera(nuevo,ProcesoEspera);
+                }
+            }
+            else
+            {
+                if(EspacioEnBloques(nuevo,ListaProcesos)){
+                    System.out.println("Entra proceso: ["+nuevo.getID()+","+nuevo.getMemoria()+","+nuevo.getCuanto()+"]");
+                    AsignacionSinAlgoritmo(nuevo,ListaProcesos,sistema);
+                }
+                else
+                {
+                    sistema.setCuenta(sistema.getCuenta()+1);
+                    AsignarEspera(nuevo,ProcesoEspera);
+                }
+            }
+        }
+        else
+        {
+            espera = (Proceso) ProcesoEspera.get(0);
+            //HAY UNO EN ESPERA
+            if(ListaProcesos.size()>3)
+            {
+                //ALGORITMOS DE COLOCACION
+                if(EspacioEnBloques(espera,ListaProcesos))
+                {
+                    switch(sistema.getTipoColocacion())
+                    {
+                        case 1:
+                            System.out.println("Entra proceso: ["+espera.getID()+","+espera.getMemoria()+","+espera.getCuanto()+"]");
+                            PrimerAjuste(espera,ListaProcesos,sistema);
+                            ProcesoEspera.clear();
+                            break;
+                        case 2:
+                            System.out.println("Entra proceso: ["+espera.getID()+","+espera.getMemoria()+","+espera.getCuanto()+"]");
+                            MejorAjuste(espera,ListaProcesos,sistema);
+                            ProcesoEspera.clear();
+                            //MEJOR AJUSTE
+                            break;
+                        case 3:
+                            System.out.println("Entra proceso: ["+espera.getID()+","+espera.getMemoria()+","+espera.getCuanto()+"]");
+                            PeorAjuste(espera,ListaProcesos,sistema);
+                            ProcesoEspera.clear();
+                            //PEOR AJUSTE
+                            break;
+                    }
+                }
+                else{
+                    System.out.println("El proceso: "+"["+espera.getID()+","+espera.getMemoria()+","+espera.getCuanto()+"] sigue esperando");                       
+                }
+            }
+            else
+            {
+               if(EspacioEnBloques(espera,ListaProcesos)){
+                    System.out.println("Entra proceso: ["+espera.getID()+","+espera.getMemoria()+","+espera.getCuanto()+"]");
+                    AsignacionSinAlgoritmo(espera,ListaProcesos,sistema);
+                    ProcesoEspera.clear();
+                }
+                else
+                {
+                    System.out.println("El proceso: "+"["+espera.getID()+","+espera.getMemoria()+","+espera.getCuanto()+"] sigue esperando");                        
+                } 
+            }
+        }     
+    }
+    
+    public static void InsertarProcesoAux(ArrayList ListaProcesos,Sistema sistema,ArrayList ProcesoEspera,int cont,ArrayList ListaAux)
+    {
+        Proceso espera;
+        if(ProcesoEspera.isEmpty())
+        {
+            Proceso nuevo = null;
+            sistema.setNumeroProceso(sistema.getNumeroProceso()+1);
+            if(sistema.getCont() >= ListaAux.size())
+            {
+                sistema.setNumeroProceso(sistema.getNumeroProceso()+1);
+                nuevo =  new Proceso(sistema.getNumeroProceso(),sistema.getCuantos(),sistema.getLimiteMemoria(),false);
+            
+            }else{
+                nuevo = (Proceso) ListaAux.get(sistema.getCont());
+                sistema.setCont(sistema.getCont()+1);
+            }
+            
             if(ListaProcesos.size()>3)
             {
                 if(EspacioEnBloques(nuevo,ListaProcesos))
