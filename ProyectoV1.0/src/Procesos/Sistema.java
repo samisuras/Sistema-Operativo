@@ -10,6 +10,15 @@ public class Sistema {
     private int TipoColocacion;
     private long TiempoInicio,TiempoFinal;
     private boolean banSwap;
+    
+    //Grafica atencion de proceso
+    private int totalDes;
+    private double TiempoAtenProceso;
+    
+    //Grafica porcentaje de ocupacion de memoria
+    private int vuelta;
+    private double porcenParcial,porcenTotal;
+    private int memoriaOcupada;
 
     public Sistema() {
     }
@@ -21,6 +30,58 @@ public class Sistema {
         this.numeroProceso = numeroProceso;
     }
 
+    public int getVuelta() {
+        return vuelta;
+    }
+
+    public void setVuelta(int vuelta) {
+        this.vuelta = vuelta;
+    }
+
+    
+    
+    public double getPorcenParcial() {
+        return porcenParcial;
+    }
+
+    public void setPorcenParcial(double porcenParcial) {
+        this.porcenParcial = porcenParcial;
+    }
+
+    public double getPorcenTotal() {
+        return porcenTotal;
+    }
+
+    public void setPorcenTotal(double porcenTotal) {
+        this.porcenTotal = porcenTotal;
+    }
+
+    public int getMemoriaOcupada() {
+        return memoriaOcupada;
+    }
+
+    public void setMemoriaOcupada(int memoriaOcupada) {
+        this.memoriaOcupada = memoriaOcupada;
+    }
+    
+    
+
+    public double getTiempoAtenProceso() {
+        return TiempoAtenProceso;
+    }
+
+    public void setTiempoAtenProceso(double TiempoAtenProceso) {
+        this.TiempoAtenProceso = TiempoAtenProceso;
+    }
+
+    public int getTotalDes() {
+        return totalDes;
+    }
+
+    public void setTotalDes(int totalDes) {
+        this.totalDes = totalDes;
+    }
+    
     public int getCont() {
         return cont;
     }

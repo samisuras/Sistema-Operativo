@@ -15,6 +15,7 @@ public class main {
         Sistema sistemaAux2 = new Sistema();
         Sistema sistema = new Sistema();
         
+        int stop=0;
         int vuelta=0;
         long inicio,finale;
         
@@ -58,7 +59,6 @@ public class main {
                 sistemaAux2.setTipoColocacion(2);
                 break;
         }
-        sistemaAux.setTipoColocacion(sistema.getTipoColocacion());
         
         IniciarMemoria(ListaProcesos,sistema);
         
@@ -84,7 +84,10 @@ public class main {
                 break;
             }
             reiniciarBanderas(ListaProcesos);
+            //GRafica 2
+            MemoriaOcupada(sistema,ListaProcesos);
             System.out.println("");
+            stop++;
         }    
         
         Memoria(ListaProcesos);
@@ -95,8 +98,7 @@ public class main {
         System.out.println("Ciclos del sistema: "+sistema.getNoCuanto());
         
         //VUELTA 2
-        System.out.print("\n\nIniciando vuelta 2 presione cualquier tecla para continuar...");
-        in.next();
+        ProcesoEspera.clear();
         ListaProcesos.clear();
         IniciarMemoria(ListaProcesos,sistemaAux);
         sistemaAux.setCont(0);
@@ -114,31 +116,116 @@ public class main {
                 break;
             }
             reiniciarBanderas(ListaProcesos);
+            //GRafica 2
+            MemoriaOcupada(sistemaAux,ListaProcesos);
         }  
         
+        
         //VUELTA 3
-        System.out.print("\n\nIniciando vuelta 3 presione cualquier tecla para continuar...");
-        in.next();
+        ProcesoEspera.clear();
+        sistemaAux2.setNumeroProceso(0);
         ListaProcesos.clear();
         IniciarMemoria(ListaProcesos,sistemaAux2);
         sistemaAux2.setCont(0);
         for(int i=0;i<vuelta;i++){
+            System.out.println("Ciclo: "+(i+1));
             if((ListaProcesos.size()>2&&i>1)&&(!sistemaAux2.isBanSwap())){
                 SwapRobin(ListaProcesos,sistemaAux2);
             }
             if(sistemaAux2.isBanSwap())
                 sistemaAux2.setBanSwap(false);
+            mostrarProcesos(ListaProcesos,i+1);
             InsertarProcesoAux(ListaProcesos,sistemaAux2,ProcesoEspera,i,ListaAux2);
+            mostrarProcesos(ListaProcesos,i+1);
             ReducirCuanto(ListaProcesos,sistemaAux2,ProcesoEspera);
+            mostrarProcesos(ListaProcesos,i+1);
             
             JuntaMemoria(ListaProcesos,sistemaAux2);
-            if(sistemaAux2.getCuenta()>=vuelta)
-            {
-                break;
-            }
+            System.out.println("Cuantos de sistema: "+sistemaAux2.getCuenta());
             reiniciarBanderas(ListaProcesos);
+            //GRafica 2
+            MemoriaOcupada(sistemaAux2,ListaProcesos);
+            System.out.println("");
+            if(i>(stop-100))
+                break;
         } 
         
+        Tablas(sistema,sistemaAux,sistemaAux2);
+        
+    }
+    
+    //Graficas
+    
+    public static void MemoriaOcupada(Sistema sistema,ArrayList Procesos)
+    {
+        sistema.setVuelta(sistema.getVuelta()+1);
+        sistema.setMemoriaOcupada(0);
+        Proceso aux = null;
+        for(int i=0;i<Procesos.size();i++)
+        {
+            aux = (Proceso) Procesos.get(i);
+            if(aux.getCuanto()!=0&&aux.getID()!=0)
+                sistema.setMemoriaOcupada(aux.getMemoria()+sistema.getMemoriaOcupada());
+        }
+        sistema.setPorcenParcial(sistema.getPorcenParcial()+((sistema.getMemoriaOcupada()*100)/sistema.getMemoriaTotal()));
+        System.out.println(sistema.getPorcenParcial());
+    }
+    
+    public static void Tablas(Sistema sistema,Sistema sistema2,Sistema sistema3)
+    {
+        for(int i=0;i<100;i++)
+        {
+            System.out.println("");
+        }
+        
+        Operaciones(sistema);
+        Operaciones(sistema2);
+        Operaciones(sistema3);
+        System.out.println("\t\tTiempo medio de atencion de Procesos(Cuantos)\tTotal Procesos atendidos\tPorcentaje de ocupacion de memoria");
+        switch(sistema.getTipoColocacion())
+        {
+            case 1:
+                System.out.println("Primer ajuste\t\t\t"+sistema.getTiempoAtenProceso()+"\t\t\t\t"+sistema.getNumeroProceso()+"\t\t\t\t\t"+sistema.getPorcenTotal()+"%");
+                break;
+            case 2:
+                System.out.println("Mejor ajuste\t\t\t"+sistema.getTiempoAtenProceso()+"\t\t\t\t"+sistema.getNumeroProceso()+"\t\t\t\t\t"+sistema.getPorcenTotal()+"%");
+                break;
+            case 3:
+                System.out.println("Peor ajuste\t\t\t"+sistema.getTiempoAtenProceso()+"\t\t\t\t"+sistema.getNumeroProceso()+"\t\t\t\t\t"+sistema.getPorcenTotal()+"%");
+                break;
+        }
+        switch(sistema2.getTipoColocacion())
+        {
+            case 1:
+                System.out.println("Primer ajuste\t\t\t"+sistema2.getTiempoAtenProceso()+"\t\t\t\t"+sistema2.getNumeroProceso()+"\t\t\t\t\t"+sistema2.getPorcenTotal()+"%");
+                break;
+            case 2:
+                System.out.println("Mejor ajuste\t\t\t"+sistema2.getTiempoAtenProceso()+"\t\t\t\t"+sistema2.getNumeroProceso()+"\t\t\t\t\t"+sistema2.getPorcenTotal()+"%");
+                break;
+            case 3:
+                System.out.println("Peor ajuste\t\t\t"+sistema2.getTiempoAtenProceso()+"\t\t\t\t"+sistema2.getNumeroProceso()+"\t\t\t\t\t"+sistema2.getPorcenTotal()+"%");
+                break;
+        }
+        switch(sistema3.getTipoColocacion())
+        {
+            case 1:
+                System.out.println("Primer ajuste\t\t\t"+sistema3.getTiempoAtenProceso()+"\t\t\t\t"+sistema3.getNumeroProceso()+"\t\t\t\t\t"+sistema3.getPorcenTotal()+"%");
+                break;
+            case 2:
+                System.out.println("Mejor ajuste\t\t\t"+sistema3.getTiempoAtenProceso()+"\t\t\t\t"+sistema3.getNumeroProceso()+"\t\t\t\t\t"+sistema3.getPorcenTotal()+"%");
+                break;
+            case 3:
+                System.out.println("Peor ajuste\t\t\t"+sistema3.getTiempoAtenProceso()+"\t\t\t\t"+sistema3.getNumeroProceso()+"\t\t\t\t\t"+sistema3.getPorcenTotal()+"%");
+                break;
+        }
+    }
+    
+    public static void Operaciones(Sistema sistema)
+    {
+        int x = sistema.getTotalDes();
+        sistema.setTiempoAtenProceso(x/sistema.getNumeroProceso());
+        
+        sistema.setPorcenTotal((sistema.getPorcenParcial())/sistema.getVuelta());
     }
     
     public static void Memoria(ArrayList procesos)
@@ -307,7 +394,6 @@ public class main {
             sistema.setNumeroProceso(sistema.getNumeroProceso()+1);
             if(sistema.getCont() >= ListaAux.size())
             {
-                sistema.setNumeroProceso(sistema.getNumeroProceso()+1);
                 nuevo =  new Proceso(sistema.getNumeroProceso(),sistema.getCuantos(),sistema.getLimiteMemoria(),false);
             
             }else{
@@ -448,19 +534,22 @@ public class main {
             if(aux.getCuanto()<=0)
             {
                 //Incrementa cuanto de sistema (Sale de la memoria)
+                
                 sistema.setCuenta(sistema.getCuenta()+1);
                 aux.setCuanto(0);
                 aux.setDespachado(true);
                 aux.setID(0);
             }else if(aux.isDespachado()==false){
+                sistema.setTotalDes(sistema.getTotalDes()+1);
                 //Incrementa cuanto de sistema (Ejecucion en el micro)
                 sistema.setCuenta(sistema.getCuenta()+1);
                 System.out.println("Despachando: ["+aux.getID()+","+aux.getMemoria()+","+aux.getCuanto()+"]");
                 aux.setCuantoMaxPorProceso(aux.getCuantoMaxPorProceso()+1);
                 aux.setCuanto(aux.getCuanto()-1); 
                 aux.setDespachado(true);
-                if(aux.getCuanto()<=0)
+                if(aux.getCuanto()<=0){
                     return;
+                }
                 if(!espera.isEmpty())
                     RoundRobin(procesos,sistema,espera,i);
                 return;
@@ -554,7 +643,7 @@ public class main {
         for(int i=0; i<ListaProcesos.size(); i++){
             aux = (Proceso) ListaProcesos.get(i);
             
-            if(aux.getMemoria()>= nuevo.getMemoria() && (aux.getCuanto()==0)){
+            if(aux.getMemoria()>= nuevo.getMemoria() && (aux.getCuanto()==0) && (aux.getID()==0)){
                 if(aux.getMemoria() <= tam){ //Busca la posicion del bloque que tenga menos espacio y sea capaz de almacenar
                     tam=aux.getMemoria();
                     posicion=i;
@@ -563,8 +652,14 @@ public class main {
             }
         }
         aux = (Proceso) ListaProcesos.get(posicion); 
-        aux.setCuanto(nuevo.getCuanto());
-        aux.setID(nuevo.getID());
+        if(aux.getID()!=0 || aux.getID()!=0){
+            aux = (Proceso) ListaProcesos.get(ListaProcesos.size()-1);
+            aux.setCuanto(nuevo.getCuanto());
+            aux.setID(nuevo.getID());
+        }else{
+            aux.setCuanto(nuevo.getCuanto());
+            aux.setID(nuevo.getID());
+        }
     }
     
         public static void PeorAjuste(Proceso nuevo, ArrayList ListaProcesos,Sistema sistema) {
